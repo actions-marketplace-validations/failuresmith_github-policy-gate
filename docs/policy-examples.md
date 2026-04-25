@@ -1,5 +1,7 @@
 # Policy Examples
 
+If you are new to the action, start with the [Quick Start Tutorial](quick-start.md). It introduces the same building blocks in order, from the smallest rules to the most advanced combinations supported by the action.
+
 ## Required tests for changed files
 
 ```yaml

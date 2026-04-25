@@ -8,6 +8,10 @@ Most policy enforcement tools require a hosted bot, a web server, and a database
 
 The action follows a "fail-safe" approach. If `.github/policy-gate.yml` is not found, it generates a temporary advisory-only config under `RUNNER_TEMP`, logs the generated path, and keeps the job non-blocking. This ensures that new repositories can adopt the action without immediate breakage.
 
+## Can I put `policies:` inside the workflow file?
+
+No. `.github/workflows/policy.yml` runs the action, but it is not the policy config file. Put `policies:` in `.github/policy-gate.yml` by default, or in another YAML file and point the action to it with `config-path`.
+
 ## Does it read the whole repository?
 
 No. The action is performance-conscious. It only reads repository facts such as `exists` or `file_contains` when your active policies explicitly require them. File contents are read only for the specific files matched by your globs.

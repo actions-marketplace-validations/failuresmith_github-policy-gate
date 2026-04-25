@@ -9,7 +9,7 @@
 
 - **Zero Infrastructure**: No bots, no webhooks, no databases, and no external services.
 - **Human Friendly**: Policies are written in simple YAML that anyone on the team can read and update.
-- **Safe by Default**: If no config is found, the action runs in advisory mode—it won't block your PRs by surprise.
+- **Safe by Default**: If no config is found, the action runs in advisory mode. It will not block your PRs by surprise.
 - **Fast and Focused**: Only reads the data it needs to evaluate your specific policies.
 
 ## How it Works
@@ -30,9 +30,11 @@ graph TD
     Fail -->|No| Pass[Allow Merge]
 ```
 
-## Quick Start
+## Start Here
 
-### 1. Add the Action to your workflow
+The fastest way to adopt `github-policy-gate` is the [Quick Start Tutorial](docs/quick-start.md). It teaches the action by example, starting with the smallest useful policy and building up to combined rules that use changed files, labels, approvals, PR text, and targeted file content checks.
+
+### 1. Add these two files
 
 Create `.github/workflows/policy.yml`:
 
@@ -51,32 +53,41 @@ jobs:
       - uses: failuresmith/github-policy-gate@v1
 ```
 
-### 2. Add your first policy
+The workflow file only runs the action. Do not put `policies:` in `.github/workflows/policy.yml`; put them in a separate `.github/policy-gate.yml` file.
 
 Create `.github/policy-gate.yml`:
 
 ```yaml
 policies:
-  - id: critical-path-tests
+  - id: pr-title-format
     severity: error
-    when:
-      changed: ['src/core/**']
     require:
-      changed: ['tests/**']
-    message: 'Changes to the core engine must include updated tests.'
-
-  - id: documentation-check
-    severity: warn
-    require:
-      changed: ['README.md', 'docs/**']
-    message: 'Consider updating documentation for this change.'
+      title:
+        - '^(feat|fix|docs|refactor|test|chore): .+'
+    message: 'PR title must start with feat:, fix:, docs:, refactor:, test:, or chore:.'
 ```
+
+These two files are the minimal setup:
+
+- `.github/workflows/policy.yml` runs the action in pull request CI.
+- `.github/policy-gate.yml` defines the `policies:` the action evaluates.
+
+### 2. Grow your policy file from the tutorial
+
+Follow the [Quick Start Tutorial](docs/quick-start.md) to extend `.github/policy-gate.yml` incrementally. The tutorial walks through:
+
+- title checks
+- test requirements for changed paths
+- label-based exceptions
+- approval thresholds for sensitive changes
+- PR body requirements
+- targeted `file_contains` checks for docs and runbooks
 
 ## Inputs
 
 | Input          | Description                                  | Default                   |
 | :------------- | :------------------------------------------- | :------------------------ |
-| `config-path`  | Path to the YAML policy file                 | `.github/policy-gate.yml` |
+| `config-path`  | Optional path to a custom YAML policy file   | `.github/policy-gate.yml` |
 | `github-token` | GitHub token for reading PR facts            | `${{ github.token }}`     |
 | `fail-on-warn` | Whether to fail the job on `warn` violations | `false`                   |
 
@@ -96,9 +107,9 @@ require:
 
 ## Documentation
 
-- 🚀 [Quick Start Guide](docs/quick-start.md) - Get running in 2 minutes.
+- 🚀 [Quick Start Tutorial](docs/quick-start.md) - Learn the action through examples from simplest to most advanced.
 - 📖 [Configuration Reference](docs/configuration.md) - All available predicates and settings.
-- 💡 [Policy Examples](docs/policy-examples.md) - Common patterns for teams.
+- 💡 [Policy Examples](docs/policy-examples.md) - Copy-paste patterns for common team guardrails.
 - 🏗️ [Architecture](docs/architecture.md) - How the engine works.
 
 ## Local Development
@@ -112,4 +123,4 @@ make build      # Build the production bundle
 
 ## License
 
-This project is licensed under the PolyForm Noncommercial 1.0.0. See [LICENSE](LICENSE) for details.
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
