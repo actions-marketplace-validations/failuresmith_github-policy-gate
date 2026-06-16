@@ -2,6 +2,14 @@
 
 The policy engine uses a YAML configuration file to define rules. By default, the action looks for `.github/policy-gate.yml`.
 
+## Action Inputs
+
+| Input          | Description                                | Default                   |
+| :------------- | :----------------------------------------- | :------------------------ |
+| `config-path`  | Optional path to a custom YAML policy file | `.github/policy-gate.yml` |
+| `github-token` | GitHub token for reading PR facts          | `${{ github.token }}`     |
+| `fail-on-warn` | Whether to fail the job on warn violations | `false`                   |
+
 ## Root level
 
 | Key        | Type       | Description                   |
