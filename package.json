@@ -16,8 +16,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "pnpm run clean && tsup --config tsup.config.ts",
-    "clean": "rm -rf build dist coverage .vitest",
+    "build": "pnpm run clean && pnpm run build:action && pnpm run build:site",
+    "build:action": "tsup --config tsup.config.ts",
+    "build:site": "tsup --config tsup.site.config.ts && node scripts/build-site-assets.mjs",
+    "clean": "rm -rf build dist coverage .vitest site-dist",
     "compile": "tsc --outDir build",
     "lint": "mkdir -p build && eslint src tests scripts eslint.config.cjs",
     "lint:ci": "mkdir -p build && eslint src tests scripts eslint.config.cjs --max-warnings=0",
@@ -31,8 +33,9 @@
     "validate:config": "pnpm run compile && node scripts/validate-example-config.js",
     "validate": "pnpm run validate:config",
     "check": "pnpm run lint:ci && pnpm run format:check && pnpm run typecheck && pnpm run test && pnpm run coverage && pnpm run build",
+    "preview:site": "pnpm run build:site && node scripts/preview-site.mjs",
     "prepare": "pnpm run build",
-    "release-dry-run": "pnpm run build && pnpm pack --dry-run"
+    "release-dry-run": "pnpm run build && npm pack --dry-run"
   },
   "keywords": [
     "github action",
@@ -72,8 +75,11 @@
     "@typescript-eslint/parser": "^8.58.0",
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "^4.1.2",
+    "bootstrap": "^5.3.8",
     "c8": "^11.0.0",
     "eslint": "^9.39.4",
+    "happy-dom": "^20.0.10",
+    "jsdom": "^27.1.0",
     "prettier": "^3.8.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.2",

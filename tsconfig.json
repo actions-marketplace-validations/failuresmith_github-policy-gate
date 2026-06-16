@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "ignoreDeprecations": "6.0",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -19,6 +19,8 @@
     "src/**/*.ts",
     "tests/**/*.ts",
     "scripts/**/*.js",
-    "tsup.config.ts"
+    "site/**/*.ts",
+    "tsup.config.ts",
+    "tsup.site.config.ts"
   ]
 }
