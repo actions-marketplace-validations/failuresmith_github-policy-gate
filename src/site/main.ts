@@ -1,6 +1,8 @@
 import { PolicyGeneratorApp } from './logic/app';
 
+// eslint-disable-next-line no-undef
 const appElement = document.querySelector('#app');
+// eslint-disable-next-line no-undef
 const modalElement = document.querySelector('#expression-modal');
 
 if (
