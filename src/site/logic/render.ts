@@ -639,7 +639,7 @@ function renderExportStep(model: AppRenderModel): string {
         ${renderOutputCard(
           'Policy YAML',
           'policy',
-          '.github/policy-gate.yml',
+          '.github/pull-request-policy.yml',
           model.output.policyYaml,
           model.copiedTarget,
         )}
@@ -896,7 +896,7 @@ function renderAdvancedSection(model: AppRenderModel): string {
           ${renderOutputCard(
             'Policy YAML',
             'policy',
-            '.github/policy-gate.yml',
+            '.github/pull-request-policy.yml',
             model.output.policyYaml,
             model.copiedTarget,
           )}
@@ -910,7 +910,7 @@ export function renderApp(model: AppRenderModel): string {
   return `
     <div class="app-shell container-xl py-5">
       <header class="hero-panel">
-        <span class="eyebrow">GitHub Policy Gate</span>
+        <span class="eyebrow">Pull Request Policy</span>
         <h1>Build the policy in a few clicks.</h1>
         <p>Less text. Smaller choices. One step at a time.</p>
       </header>

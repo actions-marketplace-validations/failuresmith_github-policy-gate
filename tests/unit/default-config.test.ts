@@ -22,10 +22,10 @@ describe('loadConfig fallback', () => {
 
   it('uses a temporary advisory-only default when config is missing', async () => {
     const workspace = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'policy-gate-workspace-'),
+      path.join(os.tmpdir(), 'pull-request-policy-workspace-'),
     );
     const runnerTemp = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'policy-gate-runner-'),
+      path.join(os.tmpdir(), 'pull-request-policy-runner-'),
     );
 
     process.chdir(workspace);

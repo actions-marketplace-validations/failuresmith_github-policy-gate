@@ -1,12 +1,12 @@
 # How It Works
 
-`github-policy-gate` runs as a GitHub Action on every pull request. It loads a YAML policy file, collects the PR facts those policies need, evaluates the rules, and reports results as CI annotations.
+`pull-request-policy` runs as a GitHub Action on every pull request. It loads a YAML policy file, collects the PR facts those policies need, evaluates the rules, and reports results as CI annotations.
 
 ## Evaluation flow
 
 ```mermaid
-graph LR
-    PR[Pull Request] --> Config[Load policy-gate.yml]
+graph TD
+    PR[Pull Request] --> Config[Load pull-request-policy.yml]
     Config --> Facts[Collect Facts]
     Facts --> Engine[Evaluate Policies]
     Engine --> CI[Annotations + Job Result]

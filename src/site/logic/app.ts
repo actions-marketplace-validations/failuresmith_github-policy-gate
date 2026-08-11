@@ -37,7 +37,7 @@ import type {
   QuickStartWizardStepId,
 } from './ui-types';
 
-const MODE_STORAGE_KEY = 'github-policy-gate-generator-mode';
+const MODE_STORAGE_KEY = 'pull-request-policy-generator-mode';
 const QUICK_START_WIZARD_STEPS: QuickStartWizardStepId[] = [
   'baseline',
   'review',
@@ -467,7 +467,7 @@ export class PolicyGeneratorApp {
       const fileName =
         downloadTarget === 'workflow'
           ? 'policy-workflow.yml'
-          : 'policy-gate.yml';
+          : 'pull-request-policy.yml';
       const content =
         downloadTarget === 'workflow' ? output.workflowYaml : output.policyYaml;
       const url = globalThis.URL.createObjectURL(

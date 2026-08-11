@@ -47,13 +47,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - id: policy-gate
+      - id: pull-request-policy
         continue-on-error: true
         uses: ./
         with:
           github-token: ${{ github.token }}
           config-path: tests/fixtures/self-test/fail.yml
-      - if: steps.policy-gate.outcome != 'failure'
+      - if: steps.pull-request-policy.outcome != 'failure'
         run: |
           echo "Expected the failure fixture to fail."
           exit 1

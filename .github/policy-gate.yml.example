@@ -1,5 +1,5 @@
-# github-policy-gate example configuration
-# Copy this file to .github/policy-gate.yml and adapt the policies you need.
+# pull-request-policy example configuration
+# Copy this file to .github/pull-request-policy.yml and adapt the policies you need.
 
 policies:
   - id: queue-change-requires-tests

@@ -7,7 +7,7 @@ Two files, then open a PR.
 `.github/workflows/policy.yml`:
 
 ```yaml
-name: policy-gate
+name: pull-request-policy
 on: [pull_request]
 
 jobs:
@@ -18,12 +18,12 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
-      - uses: failuresmith/github-policy-gate@v1
+      - uses: milaforge/pull-request-policy@0.1-beta
 ```
 
 ## 2. Add the policy file
 
-`.github/policy-gate.yml`:
+`.github/pull-request-policy.yml`:
 
 ```yaml
 policies:

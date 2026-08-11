@@ -1,4 +1,4 @@
-# github-policy-gate Agent Guide
+# pull-request-policy Agent Guide
 
 This repository is a GitHub Action for policy-as-code in pull request CI.
 
@@ -10,7 +10,7 @@ If a proposed change does not make the action more useful, more reliable, easier
 
 Build and maintain the smallest genuinely useful MVP for:
 
-`uses: failuresmith/github-policy-gate@v1`
+`uses: milaforge/pull-request-policy@0.1-beta`
 
 The action evaluates a YAML policy file against pull request and repository facts, then warns or fails with clear messages.
 
@@ -74,7 +74,7 @@ This defines *what to optimize*, not *what is allowed*.
 
 ## Missing Config Behavior (authoritative)
 
-If `.github/policy-gate.yml` is missing:
+If `.github/pull-request-policy.yml` is missing:
 
 - If mode = advisory (default):
   - run in advisory-only mode

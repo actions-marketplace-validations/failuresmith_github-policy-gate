@@ -6,7 +6,7 @@ function appendLine(lines: string[], level: number, value: string): void {
 
 export function generateWorkflowYaml(options: WorkflowOptions): string {
   const lines: string[] = [];
-  appendLine(lines, 0, 'name: policy-gate');
+  appendLine(lines, 0, 'name: pull-request-policy');
   appendLine(lines, 0, 'on: [pull_request]');
   appendLine(lines, 0, 'jobs:');
   appendLine(lines, 1, 'check-policy:');
@@ -19,12 +19,12 @@ export function generateWorkflowYaml(options: WorkflowOptions): string {
   appendLine(
     lines,
     3,
-    `- uses: failuresmith/github-policy-gate@${options.actionRef}`,
+    `- uses: milaforge/pull-request-policy@${options.actionRef}`,
   );
 
-  if (options.failOnWarn || options.configPath !== '.github/policy-gate.yml') {
+  if (options.failOnWarn || options.configPath !== '.github/pull-request-policy.yml') {
     appendLine(lines, 4, 'with:');
-    if (options.configPath !== '.github/policy-gate.yml') {
+    if (options.configPath !== '.github/pull-request-policy.yml') {
       appendLine(lines, 5, `config-path: ${options.configPath}`);
     }
     if (options.failOnWarn) {

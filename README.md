@@ -1,50 +1,67 @@
-# GitHub Policy Gate
+# Pull Request Policy
 
-[![CI](https://github.com/failuresmith/github-policy-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/failuresmith/github-policy-gate/actions/workflows/ci.yml)
-[![Marketplace](https://img.shields.io/badge/GitHub-Marketplace-blue.svg)](https://github.com/marketplace/actions/github-policy-gate)
+[![CI](https://github.com/milaforge/pull-request-policy/actions/workflows/ci.yml/badge.svg)](https://github.com/milaforge/pull-request-policy/actions/workflows/ci.yml)
+[![Marketplace](https://img.shields.io/badge/GitHub-Marketplace-blue.svg)](https://github.com/marketplace/actions/pull-request-policy)
 
-GitHub's branch protection can require approvals and passing checks — but it can't say _which_ files changed or _what_ the PR description contains. That gap is where teams get burned:
+**Policy as Code for GitHub Pull Requests.**
 
-- auth code merged without a second reviewer
-- API changes shipped without a changelog entry
-- CI workflows changed with no rollback plan in the PR body
+Define conditional rules for pull requests in YAML and enforce them automatically with GitHub Actions.
 
-**GitHub Policy Gate** Action closes that gap. You write rules in YAML; the action enforces them on every PR.
+GitHub branch protection can require approvals and passing checks. But it cannot easily express rules such as:
+
+> **If authentication code changes, require 2 approvals.**
+
+> **If a workflow changes, require security review.**
+
+> **If the public API changes, require a changelog.**
+
+That's what Pull Request Policy adds.
+
+## GitHub controls vs. Pull Request Policy
+
+| Capability                             | GitHub | Pull Request Policy |
+| -------------------------------------- | :----: | :-----------------: |
+| Require approvals                      |    ✅   |          ✅          |
+| Require passing checks                 |    ✅   |          —          |
+| Rules based on changed files           |    ❌   |          ✅          |
+| Conditional approval requirements      |    ❌   |          ✅          |
+| Require labels for specific changes    |    ❌   |          ✅          |
+| Require PR description content         |    ❌   |          ✅          |
+| Check selected file contents           |    ❌   |          ✅          |
+| Combine rules with `all`, `any`, `not` |    ❌   |          ✅          |
+| Version-controlled policy as YAML      |    ❌   |          ✅          |
+| External service required              |    —   |          ❌          |
+
+## Example
 
 ```yaml
-# .github/policy-gate.yml
 policies:
   - id: auth-needs-two-approvals
-    severity: error
     when:
       changed: ['src/auth/**']
     require:
       approval_count_at_least: 2
     message: 'Auth changes require at least 2 approvals.'
 
-  - id: api-change-needs-changelog
-    severity: error
+  - id: workflow-needs-security-review
     when:
-      changed: ['src/api/public/**']
+      changed: ['.github/workflows/**']
     require:
-      any:
-        - changed: ['CHANGELOG.md']
-        - has_label: ['skip-changelog']
-    message: 'Public API changes must update CHANGELOG.md or carry the skip-changelog label.'
+      has_label: ['security-review']
+    message: 'Workflow changes require security review.'
 ```
 
-Rules are triggered by changed files, then check title, body, labels, approvals, file existence, and file content — combined with `all`, `any`, `not`.
+The policy lives in `.github/pull-request-policy.yml` and runs as a normal GitHub Action.
 
-No bot. No external service. Just a GitHub Action and a YAML file.
+**No bot. No webhook server. No database. No external service.**
 
----
+## Quick Start
 
-## Setup
-
-**1.** Create `.github/workflows/policy.yml`:
+Create `.github/workflows/policy.yml`:
 
 ```yaml
-name: policy-gate
+name: pull-request-policy
+
 on: [pull_request]
 
 jobs:
@@ -55,10 +72,10 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
-      - uses: failuresmith/github-policy-gate@v1
+      - uses: milaforge/pull-request-policy@v0.1-beta
 ```
 
-**2.** Create `.github/policy-gate.yml` with your first rule:
+Then add `.github/pull-request-policy.yml`:
 
 ```yaml
 policies:
@@ -67,38 +84,39 @@ policies:
     require:
       title:
         - '^(feat|fix|docs|refactor|test|chore): .+'
-    message: 'PR title must match: feat|fix|docs|refactor|test|chore: <description>'
+    message: 'Invalid PR title.'
 ```
 
-Open a PR — the action runs, reports violations as annotations, and fails the check if any `error`-severity rule is violated.
+Open a pull request. Violations are reported as annotations and `error` policies fail the check.
 
----
+## What can you check?
 
-## What you can check
+| Predicate                 | Checks                  |
+| ------------------------- | ----------------------- |
+| `changed`                 | Changed files and paths |
+| `exists`                  | Files in the repository |
+| `title`                   | PR title                |
+| `body`                    | PR description          |
+| `has_label`               | PR labels               |
+| `approval_count_at_least` | Approvals               |
+| `file_contains`           | File contents           |
 
-| Predicate | What it matches |
-|---|---|
-| `changed` | Files added, modified, renamed, or deleted (glob) |
-| `exists` | Files present in the repo (glob) |
-| `title` | PR title (regex) |
-| `body` | PR description (regex) |
-| `has_label` | PR labels |
-| `approval_count_at_least` | Number of approving reviews |
-| `file_contains` | Content inside specific files (glob + regex) |
+Combine predicates with `all`, `any`, and `not`, and use `when` for conditional policies.
 
-Combine predicates with `all`, `any`, `not`. Use `when` to make a rule conditional on other predicates.
+## Why?
 
----
+**Make repository-specific engineering and security rules executable.**
+
+Pull Request Policy complements branch protection, CODEOWNERS, and security scanners by enforcing rules based on **what a pull request changes**.
 
 ## Documentation
 
-- [How It Works](docs/how-it-works.md)
-- [Quick Start Tutorial](docs/quick-start.md)
-- [Configuration Reference](docs/configuration.md)
-- [Policy Examples](docs/policy-examples.md)
-- [Architecture](docs/architecture.md)
-- [FAQ](docs/faq.md)
-- [Contributing](docs/contributing.md)
+* [How It Works](docs/how-it-works.md)
+* [Quick Start](docs/quick-start.md)
+* [Configuration](docs/configuration.md)
+* [Policy Examples](docs/policy-examples.md)
+* [Architecture](docs/architecture.md)
+* [FAQ](docs/faq.md)
 
 ## License
 

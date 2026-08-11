@@ -17,7 +17,7 @@ describe('quick start generator', () => {
   it('generates the default workflow yaml', () => {
     const yaml = generateWorkflowYaml(createDefaultGeneratorState().workflow);
 
-    expect(yaml).toBe(`name: policy-gate
+    expect(yaml).toBe(`name: pull-request-policy
 on: [pull_request]
 jobs:
   check-policy:
@@ -27,7 +27,7 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
-      - uses: failuresmith/github-policy-gate@v1
+      - uses: milaforge/pull-request-policy@0.1-beta
 `);
   });
 

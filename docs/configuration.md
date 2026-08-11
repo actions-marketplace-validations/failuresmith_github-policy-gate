@@ -1,12 +1,12 @@
 # Configuration Reference
 
-The policy engine uses a YAML configuration file to define rules. By default, the action looks for `.github/policy-gate.yml`.
+The policy engine uses a YAML configuration file to define rules. By default, the action looks for `.github/pull-request-policy.yml`.
 
 ## Action Inputs
 
 | Input          | Description                                | Default                   |
 | :------------- | :----------------------------------------- | :------------------------ |
-| `config-path`  | Optional path to a custom YAML policy file | `.github/policy-gate.yml` |
+| `config-path`  | Optional path to a custom YAML policy file | `.github/pull-request-policy.yml` |
 | `github-token` | GitHub token for reading PR facts          | `${{ github.token }}`     |
 | `fail-on-warn` | Whether to fail the job on warn violations | `false`                   |
 
@@ -50,7 +50,7 @@ Checks if all of the specified file patterns exist in the repository at the curr
 
 ```yaml
 exists:
-  - '.github/policy-gate.yml'
+  - '.github/pull-request-policy.yml'
   - 'CODEOWNERS'
 ```
 

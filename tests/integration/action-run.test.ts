@@ -11,10 +11,10 @@ import { createFacts } from '../helpers/facts';
 describe('runAction', () => {
   it('uses the temporary default config in advisory mode when config is missing', async () => {
     const workspace = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'policy-gate-action-'),
+      path.join(os.tmpdir(), 'pull-request-policy-action-'),
     );
     const runnerTemp = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'policy-gate-runner-'),
+      path.join(os.tmpdir(), 'pull-request-policy-runner-'),
     );
     const notices: string[] = [];
 
@@ -50,7 +50,7 @@ policies:
 
     const result = await runAction({
       inputs: {
-        configPath: path.join(workspace, '.github/policy-gate.yml'),
+        configPath: path.join(workspace, '.github/pull-request-policy.yml'),
         failOnWarn: false,
       },
       reporter: createReporter({ failures }),
@@ -79,7 +79,7 @@ policies:
 
     const result = await runAction({
       inputs: {
-        configPath: path.join(workspace, '.github/policy-gate.yml'),
+        configPath: path.join(workspace, '.github/pull-request-policy.yml'),
         failOnWarn: false,
       },
       reporter: createReporter({ failures, warnings }),
@@ -114,12 +114,12 @@ async function createWorkspaceWithConfig(
   configSource: string,
 ): Promise<string> {
   const workspace = await fs.mkdtemp(
-    path.join(os.tmpdir(), 'policy-gate-config-'),
+    path.join(os.tmpdir(), 'pull-request-policy-config-'),
   );
   const configDir = path.join(workspace, '.github');
   await fs.mkdir(configDir, { recursive: true });
   await fs.writeFile(
-    path.join(configDir, 'policy-gate.yml'),
+    path.join(configDir, 'pull-request-policy.yml'),
     configSource.trimStart(),
     'utf8',
   );

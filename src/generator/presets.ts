@@ -88,9 +88,9 @@ export const QUICK_START_PRESET_META: Record<
 
 export function createDefaultWorkflowOptions(): WorkflowOptions {
   return {
-    actionRef: 'v1',
+    actionRef: '0.1-beta',
     failOnWarn: false,
-    configPath: '.github/policy-gate.yml',
+    configPath: '.github/pull-request-policy.yml',
   };
 }
 

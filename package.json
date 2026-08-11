@@ -1,5 +1,5 @@
 {
-  "name": "github-policy-gate",
+  "name": "pull-request-policy",
   "version": "0.1.0",
   "description": "Policy as code for safer software delivery in GitHub CI.",
   "private": false,
@@ -53,11 +53,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/failuresmith/github-policy-gate.git"
+    "url": "git+https://github.com/milaforge/pull-request-policy.git"
   },
-  "homepage": "https://github.com/failuresmith/github-policy-gate#readme",
+  "homepage": "https://github.com/milaforge/pull-request-policy#readme",
   "bugs": {
-    "url": "https://github.com/failuresmith/github-policy-gate/issues"
+    "url": "https://github.com/milaforge/pull-request-policy/issues"
   },
   "dependencies": {
     "@actions/core": "^3.0.0",
