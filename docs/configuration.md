@@ -4,11 +4,11 @@ The policy engine uses a YAML configuration file to define rules. By default, th
 
 ## Action Inputs
 
-| Input          | Description                                | Default                   |
-| :------------- | :----------------------------------------- | :------------------------ |
+| Input          | Description                                | Default                           |
+| :------------- | :----------------------------------------- | :-------------------------------- |
 | `config-path`  | Optional path to a custom YAML policy file | `.github/pull-request-policy.yml` |
-| `github-token` | GitHub token for reading PR facts          | `${{ github.token }}`     |
-| `fail-on-warn` | Whether to fail the job on warn violations | `false`                   |
+| `github-token` | GitHub token for reading PR facts          | `${{ github.token }}`             |
+| `fail-on-warn` | Whether to fail the job on warn violations | `false`                           |
 
 ## Root level
 

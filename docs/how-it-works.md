@@ -13,6 +13,7 @@ graph TD
 ```
 
 For each policy:
+
 - If `when` is defined and does not match → **skip**
 - If `when` matches (or is absent), evaluate `require`:
   - passes → ✓
@@ -22,11 +23,11 @@ For each policy:
 
 ```yaml
 - id: auth-needs-two-approvals
-  severity: error          # error = fail CI, warn = annotate only
+  severity: error # error = fail CI, warn = annotate only
   when:
-    changed: ['src/auth/**']   # optional trigger condition
+    changed: ['src/auth/**'] # optional trigger condition
   require:
-    approval_count_at_least: 2  # what must be true when triggered
+    approval_count_at_least: 2 # what must be true when triggered
   message: 'Auth changes require 2 approvals.'
 ```
 
@@ -34,13 +35,13 @@ For each policy:
 
 ## Facts collected
 
-| Fact | Source |
-|---|---|
-| Changed files | GitHub API diff |
-| PR title / body / labels | GitHub API |
-| Approval count | GitHub API reviews |
-| File existence | Checked-out repo |
-| File contents | Checked-out repo (only when `file_contains` is used) |
+| Fact                     | Source                                               |
+| ------------------------ | ---------------------------------------------------- |
+| Changed files            | GitHub API diff                                      |
+| PR title / body / labels | GitHub API                                           |
+| Approval count           | GitHub API reviews                                   |
+| File existence           | Checked-out repo                                     |
+| File contents            | Checked-out repo (only when `file_contains` is used) |
 
 File contents are read lazily — only if a `file_contains` predicate is present.
 

@@ -1,5 +1,5 @@
 name: pull-request-policy
-description: Policy as code for safer software delivery in GitHub CI.
+description: Policy as Code for GitHub pull requests. Put a security gate directly in your GitHub delivery path.
 author: milaforge
 branding:
   icon: check-square

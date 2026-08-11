@@ -21,16 +21,16 @@ That's what Pull Request Policy adds.
 
 | Capability                             | GitHub | Pull Request Policy |
 | -------------------------------------- | :----: | :-----------------: |
-| Require approvals                      |    ✅   |          ✅          |
-| Require passing checks                 |    ✅   |          —          |
-| Rules based on changed files           |    ❌   |          ✅          |
-| Conditional approval requirements      |    ❌   |          ✅          |
-| Require labels for specific changes    |    ❌   |          ✅          |
-| Require PR description content         |    ❌   |          ✅          |
-| Check selected file contents           |    ❌   |          ✅          |
-| Combine rules with `all`, `any`, `not` |    ❌   |          ✅          |
-| Version-controlled policy as YAML      |    ❌   |          ✅          |
-| External service required              |    —   |          ❌          |
+| Require approvals                      |   ✅   |         ✅          |
+| Require passing checks                 |   ✅   |          —          |
+| Rules based on changed files           |   ❌   |         ✅          |
+| Conditional approval requirements      |   ❌   |         ✅          |
+| Require labels for specific changes    |   ❌   |         ✅          |
+| Require PR description content         |   ❌   |         ✅          |
+| Check selected file contents           |   ❌   |         ✅          |
+| Combine rules with `all`, `any`, `not` |   ❌   |         ✅          |
+| Version-controlled policy as YAML      |   ❌   |         ✅          |
+| External service required              |   —    |         ❌          |
 
 ## Example
 
@@ -111,12 +111,12 @@ Pull Request Policy complements branch protection, CODEOWNERS, and security scan
 
 ## Documentation
 
-* [How It Works](docs/how-it-works.md)
-* [Quick Start](docs/quick-start.md)
-* [Configuration](docs/configuration.md)
-* [Policy Examples](docs/policy-examples.md)
-* [Architecture](docs/architecture.md)
-* [FAQ](docs/faq.md)
+- [How It Works](docs/how-it-works.md)
+- [Quick Start](docs/quick-start.md)
+- [Configuration](docs/configuration.md)
+- [Policy Examples](docs/policy-examples.md)
+- [Architecture](docs/architecture.md)
+- [FAQ](docs/faq.md)
 
 ## License
 

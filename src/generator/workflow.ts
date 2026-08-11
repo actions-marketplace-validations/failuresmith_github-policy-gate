@@ -22,7 +22,10 @@ export function generateWorkflowYaml(options: WorkflowOptions): string {
     `- uses: milaforge/pull-request-policy@${options.actionRef}`,
   );
 
-  if (options.failOnWarn || options.configPath !== '.github/pull-request-policy.yml') {
+  if (
+    options.failOnWarn ||
+    options.configPath !== '.github/pull-request-policy.yml'
+  ) {
     appendLine(lines, 4, 'with:');
     if (options.configPath !== '.github/pull-request-policy.yml') {
       appendLine(lines, 5, `config-path: ${options.configPath}`);
