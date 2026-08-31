@@ -1,115 +1,123 @@
-# GitHub Policy Gate
+# Pull Request Policy
 
-[![CI](https://github.com/failuresmith/github-policy-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/failuresmith/github-policy-gate/actions/workflows/ci.yml)
-[![Marketplace](https://img.shields.io/badge/GitHub-Marketplace-blue.svg)](https://github.com/marketplace/actions/github-policy-gate)
+[![CI](https://github.com/milaforge/pull-request-policy/actions/workflows/ci.yml/badge.svg)](https://github.com/milaforge/pull-request-policy/actions/workflows/ci.yml)
+[![Marketplace](https://img.shields.io/badge/GitHub-Marketplace-blue.svg)](https://github.com/marketplace/actions/pull-request-policy)
 
-`github-policy-gate` is a lightweight, zero-infrastructure GitHub Action that implements **Policy as Code** for your pull requests. It provides simple, declarative guardrails to ensure safer merges by checking file changes, labels, approvals, and more.
+**Policy as Code for GitHub Pull Requests.**
 
-## Why GitHub Policy Gate?
+Define conditional rules for pull requests in YAML and enforce them automatically with GitHub Actions.
 
-- **Zero Infrastructure**: No bots, no webhooks, no databases, and no external services.
-- **Human Friendly**: Policies are written in simple YAML that anyone on the team can read and update.
-- **Safe by Default**: If no config is found, the action runs in advisory mode—it won't block your PRs by surprise.
-- **Fast and Focused**: Only reads the data it needs to evaluate your specific policies.
+GitHub branch protection can require approvals and passing checks. But it cannot easily express rules such as:
 
-## How it Works
+> **If authentication code changes, require 2 approvals.**
 
-```mermaid
-graph TD
-    PR[Pull Request Event] --> Action[GitHub Policy Gate]
-    Action --> Config{Load Config}
-    Config -->|Missing| Default[Generate Advisory Config]
-    Config -->|Exists| Load[Load .github/policy-gate.yml]
-    Default --> Facts[Gather PR Facts]
-    Load --> Facts
-    Facts --> Engine[Evaluate Pure Logic Engine]
-    Engine --> Results[Report Results]
-    Results --> Annotate[PR Annotations]
-    Results --> Fail{Fail Build?}
-    Fail -->|Yes| Block[Block Merge]
-    Fail -->|No| Pass[Allow Merge]
+> **If a workflow changes, require security review.**
+
+> **If the public API changes, require a changelog.**
+
+That's what Pull Request Policy adds.
+
+## GitHub controls vs. Pull Request Policy
+
+| Capability                             | GitHub | Pull Request Policy |
+| -------------------------------------- | :----: | :-----------------: |
+| Require approvals                      |   ✅   |         ✅          |
+| Require passing checks                 |   ✅   |          —          |
+| Rules based on changed files           |   ❌   |         ✅          |
+| Conditional approval requirements      |   ❌   |         ✅          |
+| Require labels for specific changes    |   ❌   |         ✅          |
+| Require PR description content         |   ❌   |         ✅          |
+| Check selected file contents           |   ❌   |         ✅          |
+| Combine rules with `all`, `any`, `not` |   ❌   |         ✅          |
+| Version-controlled policy as YAML      |   ❌   |         ✅          |
+| External service required              |   —    |         ❌          |
+
+## Example
+
+```yaml
+policies:
+  - id: auth-needs-two-approvals
+    when:
+      changed: ['src/auth/**']
+    require:
+      approval_count_at_least: 2
+    message: 'Auth changes require at least 2 approvals.'
+
+  - id: workflow-needs-security-review
+    when:
+      changed: ['.github/workflows/**']
+    require:
+      has_label: ['security-review']
+    message: 'Workflow changes require security review.'
 ```
 
-## Quick Start
+The policy lives in `.github/pull-request-policy.yml` and runs as a normal GitHub Action.
 
-### 1. Add the Action to your workflow
+**No bot. No webhook server. No database. No external service.**
+
+## Quick Start
 
 Create `.github/workflows/policy.yml`:
 
 ```yaml
-name: policy-gate
+name: pull-request-policy
+
 on: [pull_request]
 
 jobs:
-  check-policy:
+  check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
-      - uses: failuresmith/github-policy-gate@v1
+      - uses: milaforge/pull-request-policy@v0.1-beta
 ```
 
-### 2. Add your first policy
-
-Create `.github/policy-gate.yml`:
+Then add `.github/pull-request-policy.yml`:
 
 ```yaml
 policies:
-  - id: critical-path-tests
+  - id: pr-title-format
     severity: error
-    when:
-      changed: ['src/core/**']
     require:
-      changed: ['tests/**']
-    message: 'Changes to the core engine must include updated tests.'
-
-  - id: documentation-check
-    severity: warn
-    require:
-      changed: ['README.md', 'docs/**']
-    message: 'Consider updating documentation for this change.'
+      title:
+        - '^(feat|fix|docs|refactor|test|chore): .+'
+    message: 'Invalid PR title.'
 ```
 
-## Inputs
+Open a pull request. Violations are reported as annotations and `error` policies fail the check.
 
-| Input          | Description                                  | Default                   |
-| :------------- | :------------------------------------------- | :------------------------ |
-| `config-path`  | Path to the YAML policy file                 | `.github/policy-gate.yml` |
-| `github-token` | GitHub token for reading PR facts            | `${{ github.token }}`     |
-| `fail-on-warn` | Whether to fail the job on `warn` violations | `false`                   |
+## What can you check?
 
-## Advanced Use Cases
+| Predicate                 | Checks                  |
+| ------------------------- | ----------------------- |
+| `changed`                 | Changed files and paths |
+| `exists`                  | Files in the repository |
+| `title`                   | PR title                |
+| `body`                    | PR description          |
+| `has_label`               | PR labels               |
+| `approval_count_at_least` | Approvals               |
+| `file_contains`           | File contents           |
 
-GitHub Policy Gate supports complex logic using `all`, `any`, and `not` combinators:
+Combine predicates with `all`, `any`, and `not`, and use `when` for conditional policies.
 
-```yaml
-require:
-  any:
-    - approval_count_at_least: 2
-    - has_label: ['fast-track']
-    - all:
-        - approval_count_at_least: 1
-        - has_label: ['minor-fix']
-```
+## Why?
+
+**Make repository-specific engineering and security rules executable.**
+
+Pull Request Policy complements branch protection, CODEOWNERS, and security scanners by enforcing rules based on **what a pull request changes**.
 
 ## Documentation
 
-- 🚀 [Quick Start Guide](docs/quick-start.md) - Get running in 2 minutes.
-- 📖 [Configuration Reference](docs/configuration.md) - All available predicates and settings.
-- 💡 [Policy Examples](docs/policy-examples.md) - Common patterns for teams.
-- 🏗️ [Architecture](docs/architecture.md) - How the engine works.
-
-## Local Development
-
-```bash
-make install    # Install dependencies
-make check      # Run lints and types
-make validate   # Run all tests
-make build      # Build the production bundle
-```
+- [How It Works](docs/how-it-works.md)
+- [Quick Start](docs/quick-start.md)
+- [Configuration](docs/configuration.md)
+- [Policy Examples](docs/policy-examples.md)
+- [Architecture](docs/architecture.md)
+- [FAQ](docs/faq.md)
 
 ## License
 
-This project is licensed under the PolyForm Noncommercial 1.0.0. See [LICENSE](LICENSE) for details.
+Apache 2.0. See [LICENSE](LICENSE).

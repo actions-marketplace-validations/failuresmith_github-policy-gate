@@ -32,7 +32,7 @@ export function requirePullRequestContext(
 ): PullRequestContext {
   const pullRequest = context.payload.pull_request;
   if (pullRequest === undefined) {
-    throw new Error('github-policy-gate only supports pull_request events.');
+    throw new Error('pull-request-policy only supports pull_request events.');
   }
   return {
     owner: context.repo.owner,

@@ -59,7 +59,7 @@ async function createTemporaryDefaultConfig(
 ): Promise<LoadedConfig> {
   const tempRoot =
     options.runnerTemp ?? process.env['RUNNER_TEMP'] ?? os.tmpdir();
-  const resolvedPath = path.join(tempRoot, 'github-policy-gate.default.yml');
+  const resolvedPath = path.join(tempRoot, 'pull-request-policy.default.yml');
   await fs.writeFile(resolvedPath, renderDefaultPolicyConfig(), 'utf8');
   return {
     config: createDefaultPolicyConfig(),

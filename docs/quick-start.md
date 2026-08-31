@@ -1,57 +1,99 @@
 # Quick Start
 
-Get your pull request guardrails up and running in minutes.
+Two files, then open a PR.
 
-## 1. Add the Workflow
+## 1. Add the workflow
 
-Create `.github/workflows/policy.yml` in your repository:
+`.github/workflows/policy.yml`:
 
 ```yaml
-name: policy-gate
+name: pull-request-policy
 on: [pull_request]
 
 jobs:
-  check-policy:
+  check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
-      - uses: failuresmith/github-policy-gate@v1
+      - uses: milaforge/pull-request-policy@0.1-beta
 ```
 
-## 2. Add the Policy Configuration
+## 2. Add the policy file
 
-Create `.github/policy-gate.yml` to define your rules:
+`.github/pull-request-policy.yml`:
 
 ```yaml
 policies:
-  - id: critical-path-tests
+  - id: pr-title-format
     severity: error
-    when:
-      changed: ['src/core/**']
     require:
-      changed: ['tests/**']
-    message: 'Changes to the core engine must include updated tests.'
-
-  - id: documentation-check
-    severity: warn
-    require:
-      changed: ['README.md', 'docs/**']
-    message: 'Consider updating documentation for this change.'
+      title:
+        - '^(feat|fix|docs|refactor|test|chore): .+'
+    message: 'PR title must match: feat|fix|docs|refactor|test|chore: <description>'
 ```
 
-## 3. Open a Pull Request
+Push both files. The action will annotate violations and fail the job for `error`-severity rules.
 
-Once you push these files, the action will:
+---
 
-1. Gather PR facts (changed files, labels, title, etc.).
-2. Evaluate each policy against those facts.
-3. Provide a summary in the action logs.
-4. Add annotations to the PR for any violations.
-5. Fail the build if any `error` level policies are violated.
+## Common patterns
 
-## Missing Config?
+### Require tests when core code changes
 
-Don't worry—if you add the action but forget the config file, `github-policy-gate` will generate a temporary advisory config. It won't block your PRs; it will just show you what an example configuration looks like in the logs.
+```yaml
+- id: core-needs-tests
+  severity: error
+  when:
+    changed: ['src/core/**', 'src/security/**']
+  require:
+    changed: ['tests/**']
+  message: 'Core or security changes must include tests.'
+```
+
+### Require extra approvals for sensitive paths
+
+```yaml
+- id: sensitive-paths-need-two-approvals
+  severity: error
+  when:
+    changed: ['.github/workflows/**', 'infra/**', 'src/auth/**']
+  require:
+    approval_count_at_least: 2
+  message: 'Workflow, infra, and auth changes require 2 approvals.'
+```
+
+### Allow an exemption label
+
+```yaml
+- id: api-change-needs-changelog
+  severity: error
+  when:
+    changed: ['src/api/public/**']
+  require:
+    any:
+      - changed: ['CHANGELOG.md']
+      - has_label: ['skip-changelog']
+  message: 'Public API changes must update CHANGELOG.md or carry skip-changelog label.'
+```
+
+### Require rollout notes in PR body
+
+```yaml
+- id: infra-needs-rollout-plan
+  severity: error
+  when:
+    changed: ['infra/**', 'deploy/**']
+  require:
+    body:
+      - '(?i)rollout'
+      - '(?i)rollback'
+  message: 'Infra changes must mention rollout and rollback in the PR body.'
+```
+
+---
+
+For the full predicate syntax and action inputs, see [Configuration Reference](configuration.md).
+For more examples, see [Policy Examples](policy-examples.md).

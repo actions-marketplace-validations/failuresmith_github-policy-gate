@@ -1,24 +1,58 @@
 # FAQ
 
-## Why is this a GitHub Action instead of a bot?
+## What is Pull Request Policy?
 
-Most policy enforcement tools require a hosted bot, a web server, and a database to store state. `github-policy-gate` is designed for teams that want **zero-infrastructure** guardrails. It runs entirely within your existing GitHub Actions environment, making it easier to trust and maintain.
+**Pull Request Policy** is a GitHub Action for enforcing **Policy as Code on pull requests**.
 
-## What happen if the config is missing?
+Policies are defined in YAML and can make requirements conditional on changed files, approvals, labels, PR titles, PR descriptions, and file contents.
 
-The action follows a "fail-safe" approach. If `.github/policy-gate.yml` is not found, it generates a temporary advisory-only config under `RUNNER_TEMP`, logs the generated path, and keeps the job non-blocking. This ensures that new repositories can adopt the action without immediate breakage.
+## Why is it a GitHub Action instead of a bot?
+
+Pull Request Policy is designed for **zero-infrastructure policy enforcement**.
+
+It runs inside your existing GitHub Actions workflow. There is no hosted bot, webhook server, database, or external service to operate.
+
+## Where do I define my policies?
+
+By default, policies are defined in:
+
+```text
+.github/pull-request-policy.yml
+```
+
+And the workflow file only runs the action:
+
+```text
+.github/workflows/policy.yml
+```
+
+You can use another policy file by setting the `config-path` input.
+
+## What happens if the policy file is missing?
+
+The action runs in **advisory mode** when no configuration is found. It generates a temporary configuration and does not unexpectedly block pull requests.
+
+This makes it possible to introduce the action without immediately breaking existing workflows.
 
 ## Does it read the whole repository?
 
-No. The action is performance-conscious. It only reads repository facts such as `exists` or `file_contains` when your active policies explicitly require them. File contents are read only for the specific files matched by your globs.
+No.
 
-## Can warnings fail the job?
+The action only reads repository data required by the active policies. For example, `file_contains` reads only files matched by the policy's specified globs.
 
-Yes. By default, only `severity: error` policies will fail the job. If you want `warn` violations to also fail the job, set the input `fail-on-warn: true`.
+## What happens when a policy is violated?
+
+Policies have either `error` or `warn` severity.
+
+- `error` violations fail the GitHub Actions check.
+- `warn` violations are reported without failing the check by default.
+- Set `fail-on-warn: true` to make warnings fail the job.
+
+Violations are reported as pull request annotations.
 
 ## What permissions does it need?
 
-The action requires `contents: read` and `pull-requests: read` permissions. These are used to fetch the PR metadata and read the files in the repository.
+The recommended permissions are:
 
 ```yaml
 permissions:
@@ -26,6 +60,40 @@ permissions:
   pull-requests: read
 ```
 
+These provide the read access required to evaluate pull request metadata and repository files.
+
+## Can I combine multiple conditions?
+
+Yes.
+
+Use `all`, `any`, and `not` to combine predicates, and `when` to make a policy conditional.
+
+For example:
+
+```yaml
+require:
+  all:
+    - approval_count_at_least: 2
+    - has_label:
+        - security-review
+```
+
+## Can it replace branch protection or CODEOWNERS?
+
+No.
+
+Pull Request Policy complements GitHub branch protection, CODEOWNERS, and security scanning tools.
+
+Its purpose is to enforce **conditional repository policies based on pull request context**.
+
 ## Can I test policies locally?
 
-Yes! Follow the [Local Development](../README.md#local-development) instructions. You can run the test suite to see how policies are evaluated.
+Yes.
+
+See the [Local Development](../README.md#local-development) documentation for instructions on running the test suite and evaluating policies locally.
+
+## Is it a security scanner?
+
+Not by itself.
+
+Pull Request Policy is a **policy enforcement layer**. It can enforce security-related requirements—for example, requiring additional review when `.github/workflows/**` changes—but it does not replace SAST, SCA, secret scanning, IaC scanning, or other security analysis tools.

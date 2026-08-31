@@ -1,7 +1,9 @@
 const { loadConfigFromPath } = require('../build/src/config/load-config');
 
 async function main() {
-  const config = await loadConfigFromPath('.github/policy-gate.yml.example');
+  const config = await loadConfigFromPath(
+    '.github/pull-request-policy.yml.example',
+  );
   console.log(`Validated ${config.resolvedPath}`);
 }
 
