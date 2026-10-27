@@ -6,65 +6,60 @@ import { describe, expect, it } from 'vitest';
 
 import { runAction } from '../../src/action/main';
 import type { ActionReporter } from '../../src/action/reporter';
+import type { PolicyEvaluation } from '../../src/engine/results';
 import { createFacts } from '../helpers/facts';
 
 describe('runAction', () => {
-  it('uses the temporary default config in advisory mode when config is missing', async () => {
+  it('fails with onboarding instructions when config is missing', async () => {
     const workspace = await fs.mkdtemp(
       path.join(os.tmpdir(), 'pull-request-policy-action-'),
     );
-    const runnerTemp = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'pull-request-policy-runner-'),
-    );
-    const notices: string[] = [];
+    const failures: string[] = [];
 
-    const result = await runAction({
-      inputs: { failOnWarn: false },
-      cwd: workspace,
-      runnerTemp,
-      reporter: createReporter({ notices }),
-      factsProvider: () => Promise.resolve(createFacts()),
-    });
-
-    expect(result.advisoryOnly).toBe(true);
-    expect(notices.join('\n')).toMatch(/Generated.*advisory/i);
+    await expect(
+      runAction({
+        inputs: { mode: 'enforce' },
+        cwd: workspace,
+        reporter: createReporter({ failures }),
+        factsProvider: () => Promise.resolve(createFacts()),
+      }),
+    ).rejects.toThrow(/No policy configuration found/i);
 
     await fs.rm(workspace, { recursive: true, force: true });
-    await fs.rm(runnerTemp, { recursive: true, force: true });
   });
 
   it('fails the run when an error severity policy is violated', async () => {
     const workspace = await createWorkspaceWithConfig(`
 policies:
-  - id: queue-change-requires-tests
-    severity: error
+  queue-change-requires-tests:
     when:
       changed:
         - "runtime/queue/**"
     require:
       changed:
         - "tests/**"
-    message: Queue changes require tests.
 `);
     const failures: string[] = [];
 
     const result = await runAction({
       inputs: {
         configPath: path.join(workspace, '.github/pull-request-policy.yml'),
-        failOnWarn: false,
+        mode: 'enforce',
       },
       reporter: createReporter({ failures }),
       factsProvider: () => Promise.resolve(createFacts()),
     });
 
     expect(result.errorViolations).toBe(1);
-    expect(failures[0]).toMatch(/Queue changes require tests/i);
+    expect(failures[0]).toMatch(
+      /policy check failed: 1 error violation.*annotations above/i,
+    );
   });
 
-  it('does not fail for warnings unless fail-on-warn is enabled', async () => {
+  it('does not fail for warnings in enforce mode', async () => {
     const workspace = await createWorkspaceWithConfig(`
 policies:
-  - id: api-change-needs-changelog
+  api-change-needs-changelog:
     severity: warn
     when:
       changed:
@@ -72,7 +67,6 @@ policies:
     require:
       changed:
         - "docs/release-notes/**"
-    message: API changes should include release-note evidence.
 `);
     const failures: string[] = [];
     const warnings: string[] = [];
@@ -80,7 +74,7 @@ policies:
     const result = await runAction({
       inputs: {
         configPath: path.join(workspace, '.github/pull-request-policy.yml'),
-        failOnWarn: false,
+        mode: 'enforce',
       },
       reporter: createReporter({ failures, warnings }),
       factsProvider: () => Promise.resolve(createFacts()),
@@ -89,8 +83,30 @@ policies:
     expect(result.warningViolations).toBe(1);
     expect(failures).toEqual([]);
     expect(warnings[0]).toMatch(
-      /API changes should include release-note evidence/i,
+      /Pull Request Policy warning:[\s\S]*- \[api-change-needs-changelog\]/i,
     );
+  });
+
+  it('reports error violations without failing in audit mode', async () => {
+    const workspace = await createWorkspaceWithConfig(`
+policies:
+  required-tests:
+    require:
+      changed: tests/**
+`);
+    const failures: string[] = [];
+
+    const result = await runAction({
+      inputs: {
+        configPath: path.join(workspace, '.github/pull-request-policy.yml'),
+        mode: 'audit',
+      },
+      reporter: createReporter({ failures }),
+      factsProvider: () => Promise.resolve(createFacts()),
+    });
+
+    expect(result.errorViolations).toBe(1);
+    expect(failures).toEqual([]);
   });
 });
 
@@ -106,7 +122,15 @@ function createReporter(sink: {
     warning: (message) => sink.warnings?.push(message),
     error: (message) => sink.errors?.push(message),
     fail: (message) => sink.failures?.push(message),
-    annotate: () => undefined,
+    annotate: (evaluation: PolicyEvaluation) => {
+      const message = `[${evaluation.id}] ${evaluation.message}`;
+      if (evaluation.severity === 'warn') {
+        sink.warnings?.push(message);
+      } else {
+        sink.errors?.push(message);
+      }
+    },
+    writeSummary: () => Promise.resolve(),
   };
 }
 

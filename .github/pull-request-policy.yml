@@ -1,0 +1,14 @@
+policies:
+  conventional-title:
+    require:
+      title: '^(feat|fix|docs|refactor|test|chore|build|ci|perf|revert)(\([^)]+\))?!?: .+'
+
+  non-empty-body:
+    require:
+      body: '^(?:[\s\S]*\S){3}[\s\S]*$'
+
+  lockfile-changes-need-changelog:
+    when:
+      changed: 'pnpm-lock.yaml'
+    require:
+      changed: 'CHANGELOG.md'

@@ -1,12 +1,13 @@
 # How It Works
 
-`pull-request-policy` runs as a GitHub Action on every pull request. It loads a YAML policy file, collects the PR facts those policies need, evaluates the rules, and reports results as CI annotations.
+`pull-request-policy` runs as a GitHub Action on every pull request. It loads the YAML policy file from the pull request's base SHA, collects the PR facts those policies need, evaluates the rules, and reports results as CI annotations. See [Base-SHA Configuration Loading](base-sha-config.md) for what this means when a PR changes a policy file or test fixture.
 
 ## Evaluation flow
 
 ```mermaid
 graph TD
-    PR[Pull Request] --> Config[Load pull-request-policy.yml]
+    Base[Trusted base SHA] --> Config[Load pull-request-policy.yml]
+    PR[Pull Request] --> Facts[Collect PR facts]
     Config --> Facts[Collect Facts]
     Facts --> Engine[Evaluate Policies]
     Engine --> CI[Annotations + Job Result]
@@ -17,31 +18,32 @@ For each policy:
 - If `when` is defined and does not match → **skip**
 - If `when` matches (or is absent), evaluate `require`:
   - passes → ✓
-  - fails → violation (annotated; job fails for `error` severity)
+  - fails → violation (annotated; audit reports it, enforce fails for `error` severity)
 
 ## Policy structure
 
 ```yaml
-- id: auth-needs-two-approvals
-  severity: error # error = fail CI, warn = annotate only
-  when:
-    changed: ['src/auth/**'] # optional trigger condition
-  require:
-    approval_count_at_least: 2 # what must be true when triggered
-  message: 'Auth changes require 2 approvals.'
+policies:
+  auth:
+    when:
+      changed: src/auth/**
+    approvals: 2
 ```
 
-`when` is optional. Without it, `require` is evaluated on every PR.
+This compact form defaults to `error`, generates the message, and normalizes to
+the full `Policy` representation. Use the full policy form for advanced
+predicates and combinators. `when` is optional in the full form; without it,
+`require` is evaluated on every PR.
 
 ## Facts collected
 
-| Fact                     | Source                                               |
-| ------------------------ | ---------------------------------------------------- |
-| Changed files            | GitHub API diff                                      |
-| PR title / body / labels | GitHub API                                           |
-| Approval count           | GitHub API reviews                                   |
-| File existence           | Checked-out repo                                     |
-| File contents            | Checked-out repo (only when `file_contains` is used) |
+| Fact                     | Source                                                       |
+| ------------------------ | ------------------------------------------------------------ |
+| Changed files            | GitHub API diff                                              |
+| PR title / body / labels | GitHub API                                                   |
+| Approval count           | Approved reviewers with GitHub `write` or `admin` permission |
+| File existence           | GitHub tree API at the pull request head SHA                 |
+| File contents            | GitHub Contents API at the pull request head SHA             |
 
 File contents are read lazily — only if a `file_contains` predicate is present.
 
@@ -53,13 +55,21 @@ Predicates compose with `all`, `any`, and `not`:
 require:
   any:
     - changed: ['CHANGELOG.md']
-    - has_label: ['skip-changelog']
+    - label: ['skip-changelog']
 ```
 
 ## Severity
 
 - `error` — fails CI
-- `warn` — annotates PR, does not fail (unless `fail-on-warn: true`)
+- `warn` — annotates PR and does not fail
+
+## Trial mode
+
+`mode: audit` evaluates every policy and reports violations, but never fails the
+job. The default `mode: enforce` fails only `error` violations. A practical
+rollout is: generate, run in audit mode, inspect one real PR, switch to enforce,
+then change gradual-rollout policies from `warn` to `error` and require the check
+in branch protection.
 
 ---
 

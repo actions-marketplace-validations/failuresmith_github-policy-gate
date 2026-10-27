@@ -1,22 +1,26 @@
 name: pull-request-policy
-description: Policy as Code for GitHub pull requests. Put a security gate directly in your GitHub delivery path.
+description: Enforce pull request policies with YAML rules for files, approvals, labels, titles, descriptions, and documentation.
 author: milaforge
 branding:
   icon: check-square
   color: white
 inputs:
+  policy:
+    description: Inline YAML policy for quick starts. This takes precedence over config-path and is not protected by base-SHA loading.
+    required: false
+
   config-path:
     description: Path to the policy config file.
     required: false
     default: .github/pull-request-policy.yml
   github-token:
-    description: GitHub token used to read pull request facts.
+    description: GitHub token used to read the base policy and pull request facts.
     required: false
     default: ${{ github.token }}
-  fail-on-warn:
-    description: Fail the job when warning policies are violated.
+  mode:
+    description: audit reports violations without failing; enforce fails according to policy severity.
     required: false
-    default: 'false'
+    default: enforce
 runs:
   using: node20
   main: dist/index.js

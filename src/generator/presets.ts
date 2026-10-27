@@ -11,6 +11,7 @@ import type {
   TitleFormatPresetState,
   WorkflowOptions,
 } from './types';
+import { POLICY_ACTION_SHA } from './action-refs';
 
 export interface QuickStartPresetMeta {
   id: QuickStartPresetId;
@@ -45,7 +46,7 @@ export const QUICK_START_PRESET_META: Record<
     id: 'safe-default',
     title: 'Safe default',
     description:
-      'One click baseline: title format, PR body required, tests for source changes, stronger review on sensitive paths, and rollout/rollback requirements.',
+      'Legacy macro: enable the core policy templates together. Review each template before using it for your repository.',
     isMacro: true,
   },
   'title-format': {
@@ -88,9 +89,9 @@ export const QUICK_START_PRESET_META: Record<
 
 export function createDefaultWorkflowOptions(): WorkflowOptions {
   return {
-    actionRef: '0.1-beta',
-    failOnWarn: false,
+    actionRef: POLICY_ACTION_SHA,
     configPath: '.github/pull-request-policy.yml',
+    mode: 'audit',
   };
 }
 
@@ -127,18 +128,9 @@ function createSensitivePathsPresetState(): SensitivePathsPresetState {
   return {
     enabled: true,
     severity: 'error',
-    globs: [
-      '.github/**',
-      '.github/workflows/**',
-      'infra/**',
-      'auth/**',
-      'secrets/**',
-      'deploy/**',
-      'deployment/**',
-    ],
+    globs: [],
     approvals: 2,
-    message:
-      'Workflow, infra, auth, secrets, and deployment changes require at least 2 approvals.',
+    message: 'Sensitive path changes require at least 2 trusted approvals.',
   };
 }
 
@@ -180,13 +172,22 @@ function createDocsRunbookEvidencePresetState(): DocsRunbookEvidencePresetState 
 export function createDefaultQuickStartState(): QuickStartState {
   return {
     presets: {
-      'safe-default': { enabled: true },
-      'title-format': createTitleFormatPresetState(),
+      'safe-default': { enabled: false },
+      'title-format': { ...createTitleFormatPresetState(), enabled: false },
       'pr-body-required': createPrBodyRequiredPresetState(),
-      'tests-for-source-changes': createTestsForSourceChangesPresetState(),
-      'sensitive-paths': createSensitivePathsPresetState(),
-      'release-safety': createReleaseSafetyPresetState(),
-      'docs-runbook-evidence': createDocsRunbookEvidencePresetState(),
+      'tests-for-source-changes': {
+        ...createTestsForSourceChangesPresetState(),
+        enabled: false,
+      },
+      'sensitive-paths': {
+        ...createSensitivePathsPresetState(),
+        enabled: false,
+      },
+      'release-safety': { ...createReleaseSafetyPresetState(), enabled: false },
+      'docs-runbook-evidence': {
+        ...createDocsRunbookEvidencePresetState(),
+        enabled: false,
+      },
     },
   };
 }

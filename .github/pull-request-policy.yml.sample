@@ -1,0 +1,10 @@
+# Pull Request Policy sample configuration.
+# Copy this file to .github/pull-request-policy.yml and remove policies you do
+# not need. The policy map below is the recommended starting point.
+
+policies:
+  auth:
+    when:
+      changed: src/auth/**
+    require:
+      approvals: 2

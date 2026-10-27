@@ -19,6 +19,9 @@ export interface PullRequestContext {
   owner: string;
   repo: string;
   number: number;
+  baseSha: string;
+  headSha?: string;
+  baseRef: string;
   title: string;
   body: string;
   labels: string[];
@@ -34,10 +37,22 @@ export function requirePullRequestContext(
   if (pullRequest === undefined) {
     throw new Error('pull-request-policy only supports pull_request events.');
   }
+  if (typeof pullRequest.base?.sha !== 'string' || !pullRequest.base.sha) {
+    throw new Error('pull-request-policy requires a pull request base SHA.');
+  }
+  if (typeof pullRequest.head?.sha !== 'string' || !pullRequest.head.sha) {
+    throw new Error('pull-request-policy requires a pull request head SHA.');
+  }
+  if (typeof pullRequest.base.ref !== 'string' || !pullRequest.base.ref) {
+    throw new Error('pull-request-policy requires a pull request base branch.');
+  }
   return {
     owner: context.repo.owner,
     repo: context.repo.repo,
     number: pullRequest.number,
+    baseSha: pullRequest.base.sha,
+    headSha: pullRequest.head.sha,
+    baseRef: pullRequest.base.ref,
     title: pullRequest.title ?? '',
     body: pullRequest.body ?? '',
     labels: pullRequest.labels
